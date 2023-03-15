@@ -32,7 +32,8 @@
 * @see https://linux.die.net/man/3/environ
 */
 
-#include <stdio.h> /*environ*/
+#include <stdio.h> /* environ */
+#include <stdlib.h> /* getenv */
 
 /* The ENVIRON variable contains the environment.  */
 extern char **environ;
@@ -44,7 +45,15 @@ int main ()
   for (var = environ; *var != NULL; ++var)
     printf("%s\n", *var);
 
-  printf("Don’t modify environ yourself; use the setenv "
-         "and unsetenv functions instead.");
+  /** Don’t modify environ yourself; use the setenv
+   * and unsetenv functions instead.*/
+
+  char *server_name = getenv("SERVER_NAME");
+  if (NULL == server_name)
+    /* The SERVER_NAME environment variable was not set. Use default.  */
+    server_name = "server.my-company.com";
+
+  /* Access the server here...  */
+
   return 0;
 }
