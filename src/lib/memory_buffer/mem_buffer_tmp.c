@@ -37,8 +37,10 @@
 #include "memory_buffer.h"
 
 #include <assert.h>
-#include <stdio.h> /*streams> fopen, fputs*/
-#include <unistd.h>
+#include <errno.h>
+#include <stdio.h> /*streams, SEEK_SET*/
+#include <string.h> /*strerror*/
+#include <unistd.h> /*read, write,lseek,unlink*/
 
 
 tmp_file_handle write_tmp_mem_buff(char *buffer, size_t length) {
@@ -56,6 +58,8 @@ tmp_file_handle write_tmp_mem_buff(char *buffer, size_t length) {
     /* Now write the data itself.  */
     write(fd, buffer, length);
   } else {
+    fprintf(stderr, "Could not create a unique temporary filename: %s\n",
+              strerror(errno));
     assert (fd > 0);
   }
 
@@ -77,12 +81,35 @@ char* read_tmp_mem_buff(tmp_file_handle tmp_file, size_t *length) {
     if (sizeof(*length) == rd_bytes)
       /* Allocate a buffer and fetch the data from tmp */
       buffer = (char *)malloc(*length);
-    
-    read(fd, buffer, *length);
+
+    rd_bytes = read(fd, buffer, *length);
+
+    if (rd_bytes != (ssize_t)*length) {
+      int error = errno;
+      // assert(-1 == rd_bytes);
+      switch (error) {
+      case EAGAIN: /*the FD has been marked nonblocking and the read would block*/
+      case EBADF:  /*fd is not a valid FD or is not open for reading. */
+      case EINVAL: /*fd is attached to an object which is unsuitable for reading*/
+      case EINTR: /*The call was interrupted by a signal before any data was read*/
+        fprintf(stderr, "Error while reading the buffer: %s\n",
+                strerror(errno));
+        break;
+      case EIO:
+        exit(-1); /*Handling a System Error*/
+      case EISDIR: /*Fd refers to a directory.*/
+      case EFAULT: /*buf is outside your accessible address space. */
+      default:     /* Some other error code, most likely a bug */
+        fprintf(stderr, "Aborting... %s\n",
+                strerror(errno));
+        abort(); /*Handling a bug*/
+      };
+    }
+      
     /* will cause the temporary file to go away.  */
     close(fd);
   } else {
-    assert(fd > 0); //assert if fails the condition
+    assert(tmp_file > 0); // assert if fails the condition
   }
   
   return buffer;
