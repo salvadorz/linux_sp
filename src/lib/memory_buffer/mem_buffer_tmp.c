@@ -36,7 +36,8 @@
 
 #include "memory_buffer.h"
 
-#include <stdio.h>  /*streams> fopen, fputs*/
+#include <assert.h>
+#include <stdio.h> /*streams> fopen, fputs*/
 #include <unistd.h>
 
 
@@ -54,6 +55,8 @@ tmp_file_handle write_tmp_mem_buff(char *buffer, size_t length) {
     write(fd, &length, sizeof(length));
     /* Now write the data itself.  */
     write(fd, buffer, length);
+  } else {
+    assert (fd > 0);
   }
 
   /* Use the file descriptor as the handle for the temporary file. */
@@ -78,6 +81,8 @@ char* read_tmp_mem_buff(tmp_file_handle tmp_file, size_t *length) {
     read(fd, buffer, *length);
     /* will cause the temporary file to go away.  */
     close(fd);
+  } else {
+    assert(fd > 0); //assert if fails the condition
   }
   
   return buffer;
