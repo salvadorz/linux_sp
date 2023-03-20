@@ -9,6 +9,7 @@
 #ifndef MEMORY_BUFFER_H_
 #define MEMORY_BUFFER_H_
 
+#include <stdbool.h>
 #include <stdlib.h> /*NULL (stddef)*/
 
 /* A handle for a temporary file the underlying type is a file descriptor.  */
@@ -32,6 +33,15 @@ tmp_file_handle write_tmp_mem_buf(char *buffer, size_t length);
  * @param length to retrieve amount of bytes stored on the mem buffer
  * @return char* is a allocated buffer. Must be free.
  */
-char* read_tmp_mem_buff(tmp_file_handle tmp_file, size_t *length);
+char *read_tmp_mem_buff(tmp_file_handle tmp_file, size_t *length);
+
+/**
+ * @brief Returns a buffer of length allocated to read from filename.
+ *
+ * @param filename path to read
+ * @param length amount of bytes to be read
+ * @return char* is a allocated buffer. Must be free.
+ */
+char *read_from_file(const char *filename, const size_t length, const bool block);
 
 #endif // MEMORY_BUFFER_H_
