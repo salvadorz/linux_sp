@@ -1,0 +1,2 @@
+add_library(process_execvp STATIC process_execvp.c)
+target_link_libraries(process_execvp)

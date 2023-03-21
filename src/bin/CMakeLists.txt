@@ -7,5 +7,8 @@ target_link_libraries(environ)
 add_executable(fork_ex fork_ex.c)
 target_link_libraries(fork_ex)
 
+add_executable(spawn_process spawn_process.c)
+target_link_libraries(spawn_process process_execvp)
+
 add_executable(get_opts get_opts.c)
 target_link_libraries(get_opts)
