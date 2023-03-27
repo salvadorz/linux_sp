@@ -21,3 +21,7 @@ target_link_libraries(spawn_process process_execvp)
 # Example-6 Sigaction for SIGHLD to detect process terminaion
 add_executable(signal_disposition signal_disposition.c)
 target_link_libraries(signal_disposition)
+
+# Example-7 Sigaction for SIGHLD to detect process terminaion
+add_executable(daemon_create daemon.c)
+target_link_libraries(daemon_create)
