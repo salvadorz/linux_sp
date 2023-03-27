@@ -18,4 +18,6 @@ target_link_libraries(fork_ex)
 add_executable(spawn_process spawn_process.c)
 target_link_libraries(spawn_process process_execvp)
 
-
+# Example-6 Sigaction for SIGHLD to detect process terminaion
+add_executable(signal_disposition signal_disposition.c)
+target_link_libraries(signal_disposition)
