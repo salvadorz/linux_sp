@@ -58,9 +58,10 @@ int main() {
   /* Now do things, including forking a child process.  */
   pid_t pid = fork();
   if (pid == 0) { // if child
-    sleep(5);
-    printf("Child process <%d> finishing...\n", getpid());
-    return_val = EXIT_SUCCESS;
+    if (0u == sleep(5)) {
+      printf("Child process <%d> finishing...\n", getpid());
+      return_val = EXIT_SUCCESS;
+    }
   } else { // Main program
 
     do {
@@ -68,9 +69,11 @@ int main() {
         printf("Interrupted by signal handler\n");
         if ((WIFEXITED(child_exit_status)) &&
             EXIT_SUCCESS == (WEXITSTATUS(child_exit_status))) {
-          printf("Child process <%d> exited succesfully", pid);
+          printf("Child process <%d> exited succesfully\n", pid);
           return_val = EXIT_SUCCESS;
-        }
+        } else
+          printf("Child process <%d> exited abnormally with code %d\n", pid,
+                 WEXITSTATUS(child_exit_status));
       } else {
         if ((WIFEXITED(child_exit_status)) &&
             EXIT_SUCCESS == (WEXITSTATUS(child_exit_status))) {
