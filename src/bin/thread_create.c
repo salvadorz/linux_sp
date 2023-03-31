@@ -36,27 +36,39 @@
 #include <stdlib.h> /*NULL (stddef)*/
 #include <unistd.h>
 
-/* Prints x's to stderr.  The parameter is unused.  Does not return.  */
+typedef struct thread_args {
+  char c;
+  // N times to print
+  int times;
+} thread_args_t;
 
-void *print_xs(void *int_arg) { // To show issues if data sync it's not used
-  fprintf(stderr, "'%d'\n", *(int*)int_arg);
-  int times = (*(int*)int_arg) + 20;
-  while (times--)
-    fputc('x', stderr);
+/* Prints a char to stderr.  The parameter is received by pthread_create.  Does not return.  */
+
+void *print_char(void *thread_arg) {
+
+  thread_args_t data = (*(thread_args_t *)thread_arg);
+  while (data.times--)
+    fputc(data.c, stderr);
   fputc('\n', stderr);
   return NULL;
 }
 
 /* The main program. */
 int main() {
-  int times = 20u;
-  pthread_t thread_id;
-  /* Create a new thread.  The new thread will run the print_xs function.  */
-  pthread_create(&thread_id, NULL, &print_xs, &times);
-  /* Print o's continuously to stderr.  */
-  do
-    fputc('o', stderr);
-  while (--times);
+
+  pthread_t     thread_1_id, thread_2_id;
+  thread_args_t thread_1_arg, thread_2_arg;
+
+  thread_1_arg.c = 'x';
+  thread_1_arg.times = 15u;
+  /* Create a new thread.  The new thread will run the print_char function.*/
+  pthread_create(&thread_1_id, NULL, &print_char, &thread_1_arg);
+
+  thread_2_arg.c = 'o';
+  thread_2_arg.times = 20u;
+  /* Create a new thread.  The new thread will run the print_char function.*/
+  pthread_create(&thread_2_id, NULL, &print_char, &thread_2_arg);
+
   sleep(1); //giving time to run the thread; if process ends all threads die.
   return 0;
 }
