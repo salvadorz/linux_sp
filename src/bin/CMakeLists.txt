@@ -25,3 +25,7 @@ target_link_libraries(signal_disposition)
 # Example-7 Sigaction for SIGHLD to detect process terminaion
 add_executable(daemon_create daemon.c)
 target_link_libraries(daemon_create)
+
+# Example-8 pThread Create
+add_executable(thread_create thread_create.c)
+target_link_libraries(thread_create pthread)
