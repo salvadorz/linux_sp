@@ -28,7 +28,7 @@
  * @date 26 Mar 2023
  * @brief File for show how-to use pthreads
  *
- * @see https://linux.die.net/man/3/pthread_create
+ * @see https://linux.die.net/man/3/pthread_join
  */
 
 #include <pthread.h>
@@ -69,6 +69,8 @@ int main() {
   /* Create a new thread.  The new thread will run the print_char function.*/
   pthread_create(&thread_2_id, NULL, &print_char, &thread_2_arg);
 
-  sleep(1); //giving time to run the thread; if process ends all threads die.
+  /* waiting for the threads*/
+  pthread_join(thread_1_id, NULL);
+  pthread_join(thread_2_id, NULL);
   return 0;
 }
