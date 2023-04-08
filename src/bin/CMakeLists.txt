@@ -29,3 +29,7 @@ target_link_libraries(daemon_create)
 # Example-8 pThread Create
 add_executable(thread_create thread_create.c)
 target_link_libraries(thread_create pthread)
+
+# Example-9 pThread Banking
+add_executable(threads_bank_withdrawals threads_bank_withdrawals.c)
+target_link_libraries(threads_bank_withdrawals banking pthread)
