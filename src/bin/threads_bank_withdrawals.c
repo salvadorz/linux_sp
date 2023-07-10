@@ -44,6 +44,9 @@
 const char *locking_types[] = {"LOCKING_NONE", "LOCKING_MUTEX",
                                "LOCKING_SCOPED"};
 
+/* The key used to associate a file descriptor by each thread. */
+pthread_key_t thread_log_key;
+
 /**
  * A struture used to start threads for the withdrawl example
  */
@@ -65,7 +68,26 @@ struct withdraw_threadparams {
  */
 static void *start_withdrawl_thread(void *arg) {
   struct withdraw_threadparams *params = (struct withdraw_threadparams *)arg;
-  do_withdrawls(params->account, params->withdraw_request);
+  uint32_t withdraw_per_thread = 0;
+  char thread_log_filename[32u];
+  FILE *thread_log_file;
+
+  /* Generate the filename for this thread's log file.  */
+  sprintf(thread_log_filename, "atm_%ssafe-%ld.log",
+          (ACCOUNT_LOCKING_NON == params->account->locktype) ? "non-" : "",
+          (long)pthread_self());
+  /* Open the log file.  */
+  thread_log_file = fopen(thread_log_filename, "w");
+  /* Store the file pointer in thread-specific data under thread_log_key.  */
+  pthread_setspecific(thread_log_key, thread_log_file);
+
+  write_atm_log("ATM Statement.", &thread_log_key);
+
+  withdraw_per_thread =
+      do_withdrawls(params->account, params->withdraw_request, &thread_log_key);
+  printf("Total disbursed %d from thread %ld\n", withdraw_per_thread,
+         pthread_self());
+  params->withdrawn_money = withdraw_per_thread;
   return arg;
 }
 
@@ -94,6 +116,8 @@ static bool run_withdrawl_threads(struct account *account,
     memset(&params, 0, sizeof(struct withdraw_threadparams));
     params.account = account;
     params.withdraw_request = withdraw_request;
+    pthread_key_create(&thread_log_key, close_atm_log);
+
     for (thread = 0; thread < num_threads; thread++) {
       thread_array[thread] = (pthread_t *)malloc(sizeof(pthread_t));
       if (thread_array[thread] == NULL) {
@@ -134,7 +158,7 @@ int main() {
 
   struct account useraccount;
 
-  for (int locking_type = ACCOUNT_LOCKING_NONE;
+  for (int locking_type = ACCOUNT_LOCKING_NON;
        locking_type < ACCOUNT_LOCKING_MAX; locking_type++) {
     printf("Running with locking type: %s\n", locking_types[locking_type]);
     withdraw_account_init(&useraccount, STARTING_BALANCE,

@@ -11,14 +11,15 @@
 
 #include <pthread.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 /**
  * The type of locking to use for withdrawls
  */
 typedef enum withdraw_locking {
-  ACCOUNT_LOCKING_NONE  = 0,  // unsafe implementation (demo purposes)
-  ACCOUNT_LOCKING_MUTEX = 1,  // use a lock and unlock mutex approach
-  ACCOUNT_LOCKING_MAX   = 2,  // Max number of Locking types defined
+  ACCOUNT_LOCKING_NON  = 0,  // unsafe implementation (demo purposes)
+  ACCOUNT_LOCKING_MTX  = 1,  // use a lock and unlock mutex approach
+  ACCOUNT_LOCKING_MAX  = 2,  // Max number of Locking types defined
 } withdraw_locking_t;
 
 /**
@@ -28,11 +29,11 @@ typedef struct account {
   /**
    * The current balance of the account
    */
-  int current_balance;
+  int32_t current_balance;
   /**
    * The total of approved withdrawls on the account
    */
-  unsigned int withdrawl_total;
+  uint32_t withdrawl_total;
 
   /**
    * The mutex used to lock this account when manipulating values, for thread
@@ -57,14 +58,31 @@ bool withdraw_account_init(account_t *account,
  *
  * @param account to perform withdrawals
  * @param withdraw_request amount to withdraw
+ * @return total withdrawals
  */
-void do_withdrawls(account_t *account, unsigned int withdraw_request);
+uint32_t do_withdrawls(account_t *account, uint32_t withdraw_request,
+                       uint32_t *key);
 
 /**
  * @brief Disburse amount money
  *
  * @param amount to be disbursed
  */
-void disburse_money(unsigned int amount);
+void disburse_money(uint32_t amount);
+
+/**
+ * @brief Perform writes to the log bank-statement
+ *
+ * @param message to log
+ * @param key to the atm-log (per thread)
+ */
+void write_atm_log(const char *message, uint32_t *key);
+
+/**
+ * @brief Close the log bank-statement
+ *
+ * @param thread_log handler to close the file descriptor
+ */
+void close_atm_log(void *thread_log);
 
 #endif // threads_banking_H_
