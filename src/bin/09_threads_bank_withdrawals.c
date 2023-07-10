@@ -45,7 +45,7 @@ const char *locking_types[] = {"LOCKING_NONE", "LOCKING_MUTEX",
                                "LOCKING_SCOPED"};
 
 /* The key used to associate a file descriptor by each thread. */
-pthread_key_t thread_log_key;
+pthread_key_t thread_fd_log_key;
 
 /**
  * A struture used to start threads for the withdrawl example
@@ -59,6 +59,10 @@ struct withdraw_threadparams {
    * The amount to request in each withdrawl on this thread
    */
   unsigned int withdraw_request;
+  /**
+   * Total money disbursed by the thread
+   */
+  unsigned int withdrawn_money;
 };
 
 /**
@@ -78,14 +82,14 @@ static void *start_withdrawl_thread(void *arg) {
           (long)pthread_self());
   /* Open the log file.  */
   thread_log_file = fopen(thread_log_filename, "w");
-  /* Store the file pointer in thread-specific data under thread_log_key.  */
-  pthread_setspecific(thread_log_key, thread_log_file);
+  /* Store the file pointer in thread-specific data under thread_fd_log_key.  */
+  pthread_setspecific(thread_fd_log_key, thread_log_file);
 
-  write_atm_log("ATM Statement.", &thread_log_key);
+  write_atm_log("ATM Statement.", &thread_fd_log_key);
 
   withdraw_per_thread =
-      do_withdrawls(params->account, params->withdraw_request, &thread_log_key);
-  printf("Total disbursed %d from thread %ld\n", withdraw_per_thread,
+      do_withdrawls(params->account, params->withdraw_request, &thread_fd_log_key);
+  printf("Total disbursed %4d thread %ld\n", withdraw_per_thread,
          pthread_self());
   params->withdrawn_money = withdraw_per_thread;
   return arg;
@@ -116,7 +120,7 @@ static bool run_withdrawl_threads(struct account *account,
     memset(&params, 0, sizeof(struct withdraw_threadparams));
     params.account = account;
     params.withdraw_request = withdraw_request;
-    pthread_key_create(&thread_log_key, close_atm_log);
+    pthread_key_create(&thread_fd_log_key, close_atm_log);
 
     for (thread = 0; thread < num_threads; thread++) {
       thread_array[thread] = (pthread_t *)malloc(sizeof(pthread_t));
@@ -137,17 +141,22 @@ static bool run_withdrawl_threads(struct account *account,
                (unsigned long int)*thread_array[thread]);
       }
     }
+    uint32_t total_withdrawl_from_account = 0;
     for (thread = 0; thread < num_threads; thread++) {
       if (thread_array[thread] != NULL) {
-        int rc = pthread_join(*thread_array[thread], NULL);
+        int rc = pthread_join(*thread_array[thread], (void *)&params);
         if (rc != 0) {
           printf("Attempt to pthread_join thread %u failed with %d\n", thread,
                  rc);
           success = false;
         }
+        total_withdrawl_from_account += params.withdrawn_money;
+        printf("Total Disbursed $%u from atm %d\n", params.withdrawn_money,
+               thread);
         free(thread_array[thread]);
       }
     }
+    printf("Total Disbursed $%u from account\n", total_withdrawl_from_account);
     free(thread_array);
   }
   return success;

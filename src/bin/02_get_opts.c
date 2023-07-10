@@ -44,6 +44,8 @@
 /* The name of the program.  */
 const char *program_name;
 
+void print_usage(FILE *stream, int exit_code);
+
 /* Prints usage information for the program to STREAM (e.g. stdout or stderr),
    and exit the program with EXIT_CODE.  Does not return. */
 
@@ -88,7 +90,8 @@ int main(int argc, char *argv[]) {
     case 'h': /* -h or --help */
       /* User has requested usage information.  Print it to standard
          output, and exit with exit code zero (normal termination).  */
-      print_usage(stdout, 0);
+      print_usage(stdout, (int)0);
+      break;
 
     case 'o': /* -o or --output */
       /* This option takes an argument, the name of the output file.  */
