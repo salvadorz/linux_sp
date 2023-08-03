@@ -1,35 +1,32 @@
-# Example-1 Beffered strams vs Non-buffered
-add_executable(buffered_streams buffered_streams.c)
-target_link_libraries(buffered_streams)
+# Example-1 Buffered strams vs Non-buffered
+add_executable(01_buffered_streams 01_buffered_streams.c)
 
 # Example-2 to use vargs with get_opt frol Linux
-add_executable(get_opts get_opts.c)
-target_link_libraries(get_opts)
+add_executable(02_get_opts 02_get_opts.c)
 
 # Example-3 get Env vars
-add_executable(environ get_environment.c)
-target_link_libraries(environ)
+add_executable(03_environ 03_get_environment.c)
 
 # Example-4 Show the fork process
-add_executable(fork_ex fork_ex.c)
-target_link_libraries(fork_ex)
+add_executable(04_fork_ex 04_fork_ex.c)
 
 # Example-5 Fork and Exec a process and waitpid using static lib
-add_executable(spawn_process spawn_process.c)
-target_link_libraries(spawn_process process_execvp)
+add_executable(05_spawn_process 05_spawn_process.c)
+target_link_libraries(05_spawn_process process_execvp)
 
 # Example-6 Sigaction for SIGHLD to detect process terminaion
-add_executable(signal_disposition signal_disposition.c)
-target_link_libraries(signal_disposition)
+add_executable(06_signal_disposition 06_signal_disposition.c)
 
 # Example-7 Sigaction for SIGHLD to detect process terminaion
-add_executable(daemon_create daemon.c)
-target_link_libraries(daemon_create)
+add_executable(07_daemon_create 07_daemon.c)
 
 # Example-8 pThread Create
-add_executable(thread_create thread_create.c)
-target_link_libraries(thread_create pthread)
+add_executable(08_thread_create 08_thread_create.c)
+target_link_libraries(08_thread_create pthread)
 
 # Example-9 pThread Banking
-add_executable(threads_bank_withdrawals threads_bank_withdrawals.c)
-target_link_libraries(threads_bank_withdrawals banking pthread)
+add_executable(09_threads_bank_withdrawals 09_threads_bank_withdrawals.c)
+target_link_libraries(09_threads_bank_withdrawals banking pthread)
+
+add_executable(10_sleep_app 10_sleep_app.c)
+target_link_libraries(10_sleep_app sleep_types)
